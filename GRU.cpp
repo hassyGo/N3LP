@@ -1,6 +1,7 @@
 #include "GRU.hpp"
 #include "ActFunc.hpp"
 #include "Utils.hpp"
+#include <Eigen/SVD>
 
 GRU::GRU(const int inputDim, const int hiddenDim){
   this->Wxr = MatD(hiddenDim, inputDim);
@@ -25,6 +26,10 @@ void GRU::init(Rand& rnd, const double scale){
   
   rnd.uniform(this->Wxu, scale);
   rnd.uniform(this->Whu, scale);
+
+  this->Whr = Eigen::JacobiSVD<MatD>(this->Whr, Eigen::ComputeFullV|Eigen::ComputeFullU).matrixU();
+  this->Whz = Eigen::JacobiSVD<MatD>(this->Whz, Eigen::ComputeFullV|Eigen::ComputeFullU).matrixU();
+  this->Whu = Eigen::JacobiSVD<MatD>(this->Whu, Eigen::ComputeFullV|Eigen::ComputeFullU).matrixU();
 }
 
 void GRU::forward(const MatD& xt, const GRU::State* prev, GRU::State* cur){
