@@ -54,7 +54,7 @@ void LSTM::backward(LSTM::State* prev, LSTM::State* cur, LSTM::Grad& grad, const
   MatD delo, deli, delu, delf;
 
   cur->delc.array() += ActFunc::tanhPrime(cur->cTanh).array()*cur->delh.array()*cur->o.array();
-  prev->delc = cur->delc.array()*cur->f.array();
+  prev->delc.array() += cur->delc.array()*cur->f.array();
   delo = ActFunc::logisticPrime(cur->o).array()*cur->delh.array()*cur->cTanh.array();
   deli = ActFunc::logisticPrime(cur->i).array()*cur->delc.array()*cur->u.array();
   delf = ActFunc::logisticPrime(cur->f).array()*cur->delc.array()*prev->c.array();

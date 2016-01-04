@@ -102,6 +102,7 @@ void EncDec::train(EncDec::Data* data, LSTM::Grad& lstmSrcGrad, LSTM::Grad& lstm
   data->decState.back()->delc = this->zeros;
 
   for (int i = data->tgt.size()-1; i >= 1; --i){
+    data->decState[i-1]->delc = this->zeros;
     this->dec.backward(data->decState[i-1], data->decState[i], lstmTgtGrad, this->targetEmbed.col(data->tgt[i-1]));
 
     if (embedGrad.targetEmbed.count(data->tgt[i-1])){
@@ -117,6 +118,7 @@ void EncDec::train(EncDec::Data* data, LSTM::Grad& lstmSrcGrad, LSTM::Grad& lstm
 
   for (int i = data->src.size(); i >= 1; --i){
     data->encState[i-1]->delh = this->zeros;
+    data->encState[i-1]->delc = this->zeros;
     this->enc.backward(data->encState[i-1], data->encState[i], lstmSrcGrad, this->sourceEmbed.col(data->src[i-1]));
 
     if (embedGrad.sourceEmbed.count(data->src[i-1])){
