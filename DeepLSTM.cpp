@@ -36,7 +36,7 @@ void DeepLSTM::backward(DeepLSTM::State* prev, DeepLSTM::State* cur, DeepLSTM::G
 
 void DeepLSTM::sgd(const DeepLSTM::Grad& grad, const double learningRate){
   for (int i = 0; i < (int)grad.lstm.size(); ++i){
-    this->lstms[i].sgd(grad.lstm[0], learningRate);
+    this->lstms[i].sgd(grad.lstm[i], learningRate);
   }
 }
 
