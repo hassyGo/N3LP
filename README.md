@@ -8,6 +8,7 @@ The LSTM implemented in this project employs a variant of the major LSTM's gate 
 See [1, 2] for the simplified version of the LSTM implemented here.
 
 [1] http://arxiv.org/abs/1410.4615
+
 [2] http://nlp.stanford.edu/pubs/tai-socher-manning-acl2015.pdf
 
 ## USAGE ##
