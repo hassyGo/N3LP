@@ -357,27 +357,6 @@ void EncDec::train(EncDec::Data* data, std::vector<LSTM::State*>& encState, std:
   }
 }
 
-void* EncDec::ThreadArg::threadFunc(void* a){
-  EncDec::ThreadArg* arg = (EncDec::ThreadArg*)a;
-  Real loss;
-
-  for (int i = arg->beg; i <= arg->end; ++i){
-    arg->encdec.train(arg->encdec.trainData[i], arg->encState, arg->decState, arg->grad, loss);
-    //arg->encdec.gradCheck(arg->encdec.trainData[i], arg->encState, arg->decState, arg->grad);
-    arg->loss += loss;
-    /*
-    for (auto it = arg->encdec.trainData[i]->encState.begin(); it != arg->encdec.trainData[i]->encState.end(); ++it){
-      (*it)->clear();
-    }
-    for (auto it = arg->encdec.trainData[i]->decState.begin(); it != arg->encdec.trainData[i]->decState.end(); ++it){
-      (*it)->clear();
-    }
-    */
-  }
-
-  pthread_exit(0);
-}
-
 void EncDec::trainOpenMP(const Real learningRate, const int miniBatchSize, const int numThreads){
   static std::vector<EncDec::ThreadArg*> args;
   static std::vector<std::pair<int, int> > miniBatch;

@@ -139,6 +139,4 @@ public:
   EncDec::Grad grad;
   Real loss;
   std::vector<LSTM::State*> encState, decState;
-
-  static void* threadFunc(void* arg);
 };
