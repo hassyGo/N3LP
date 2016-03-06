@@ -5,22 +5,22 @@
 LSTM::LSTM(const int inputDim, const int hiddenDim){
   this->Wxi = MatD(hiddenDim, inputDim);
   this->Whi = MatD(hiddenDim, hiddenDim);
-  this->bi = MatD::Zero(hiddenDim, 1);
+  this->bi = VecD::Zero(hiddenDim);
 
   this->Wxf = MatD(hiddenDim, inputDim);
   this->Whf = MatD(hiddenDim, hiddenDim);
-  this->bf = MatD::Zero(hiddenDim, 1);
+  this->bf = VecD::Zero(hiddenDim);
 
   this->Wxo = MatD(hiddenDim, inputDim);
   this->Who = MatD(hiddenDim, hiddenDim);
-  this->bo = MatD::Zero(hiddenDim, 1);
+  this->bo = VecD::Zero(hiddenDim);
 
   this->Wxu = MatD(hiddenDim, inputDim);
   this->Whu = MatD(hiddenDim, hiddenDim);
-  this->bu = MatD::Zero(hiddenDim, 1);
+  this->bu = VecD::Zero(hiddenDim);
 }
 
-void LSTM::init(Rand& rnd, const double scale){
+void LSTM::init(Rand& rnd, const Real scale){
   rnd.uniform(this->Wxi, scale);
   rnd.uniform(this->Whi, scale);
 
@@ -34,11 +34,15 @@ void LSTM::init(Rand& rnd, const double scale){
   rnd.uniform(this->Whu, scale);
 }
 
-void LSTM::forward(const MatD& xt, const LSTM::State* prev, LSTM::State* cur){
-  cur->i = this->bi + this->Wxi*xt + this->Whi*prev->h;
-  cur->f = this->bf + this->Wxf*xt + this->Whf*prev->h;
-  cur->o = this->bo + this->Wxo*xt + this->Who*prev->h;
-  cur->u = this->bu + this->Wxu*xt + this->Whu*prev->h;
+void LSTM::forward(const VecD& xt, const LSTM::State* prev, LSTM::State* cur){
+  cur->i = this->bi;
+  cur->i.noalias() += this->Wxi*xt + this->Whi*prev->h;
+  cur->f = this->bf;
+  cur->f.noalias() += this->Wxf*xt + this->Whf*prev->h;
+  cur->o = this->bo;
+  cur->o.noalias() += this->Wxo*xt + this->Who*prev->h;
+  cur->u = this->bu;
+  cur->u.noalias() += this->Wxu*xt + this->Whu*prev->h;
 
   ActFunc::logistic(cur->i);
   ActFunc::logistic(cur->f);
@@ -49,9 +53,24 @@ void LSTM::forward(const MatD& xt, const LSTM::State* prev, LSTM::State* cur){
   ActFunc::tanh(cur->cTanh);
   cur->h = cur->o.array()*cur->cTanh.array();
 }
+void LSTM::forward(const VecD& xt, LSTM::State* cur){
+  cur->i = this->bi;
+  cur->i.noalias() += this->Wxi*xt;
+  cur->o = this->bo;
+  cur->o.noalias() += this->Wxo*xt;
+  cur->u = this->bu;
+  cur->u.noalias() += this->Wxu*xt;
 
-void LSTM::backward(LSTM::State* prev, LSTM::State* cur, LSTM::Grad& grad, const MatD& xt){
-  MatD delo, deli, delu, delf;
+  ActFunc::logistic(cur->i);
+  ActFunc::logistic(cur->o);
+  ActFunc::tanh(cur->u);
+  cur->c = cur->i.array()*cur->u.array();
+  cur->cTanh = cur->c;
+  ActFunc::tanh(cur->cTanh);
+  cur->h = cur->o.array()*cur->cTanh.array();
+}
+void LSTM::backward(LSTM::State* prev, LSTM::State* cur, LSTM::Grad& grad, const VecD& xt){
+  VecD delo, deli, delu, delf;
 
   cur->delc.array() += ActFunc::tanhPrime(cur->cTanh).array()*cur->delh.array()*cur->o.array();
   prev->delc.array() += cur->delc.array()*cur->f.array();
@@ -60,7 +79,7 @@ void LSTM::backward(LSTM::State* prev, LSTM::State* cur, LSTM::Grad& grad, const
   delf = ActFunc::logisticPrime(cur->f).array()*cur->delc.array()*prev->c.array();
   delu = ActFunc::tanhPrime(cur->u).array()*cur->delc.array()*cur->i.array();
   
-  cur->delx =
+  cur->delx.noalias() =
     this->Wxi.transpose()*deli+
     this->Wxf.transpose()*delf+
     this->Wxo.transpose()*delo+
@@ -89,8 +108,29 @@ void LSTM::backward(LSTM::State* prev, LSTM::State* cur, LSTM::Grad& grad, const
   grad.bo += delo;
   grad.bu += delu;
 }
+void LSTM::backward(LSTM::State* cur, LSTM::Grad& grad, const VecD& xt){
+  VecD delo, deli, delu;
 
-void LSTM::sgd(const LSTM::Grad& grad, const double learningRate){
+  cur->delc.array() += ActFunc::tanhPrime(cur->cTanh).array()*cur->delh.array()*cur->o.array();
+  delo = ActFunc::logisticPrime(cur->o).array()*cur->delh.array()*cur->cTanh.array();
+  deli = ActFunc::logisticPrime(cur->i).array()*cur->delc.array()*cur->u.array();
+  delu = ActFunc::tanhPrime(cur->u).array()*cur->delc.array()*cur->i.array();
+  
+  cur->delx.noalias() =
+    this->Wxi.transpose()*deli+
+    this->Wxo.transpose()*delo+
+    this->Wxu.transpose()*delu;
+
+  grad.Wxi.noalias() += deli*xt.transpose();
+  grad.Wxo.noalias() += delo*xt.transpose();
+  grad.Wxu.noalias() += delu*xt.transpose();
+
+  grad.bi += deli;
+  grad.bo += delo;
+  grad.bu += delu;
+}
+
+void LSTM::sgd(const LSTM::Grad& grad, const Real learningRate){
   this->Wxi -= learningRate*grad.Wxi;
   this->Whi -= learningRate*grad.Whi;
   this->bi -= learningRate*grad.bi;
@@ -123,34 +163,34 @@ void LSTM::load(std::ifstream& ifs){
 }
 
 void LSTM::State::clear(){
-  this->h = MatD();
-  this->c = MatD();
-  this->u = MatD();
-  this->i = MatD();
-  this->f = MatD();
-  this->o = MatD();
-  this->cTanh = MatD();
-  this->delh = MatD();
-  this->delc = MatD();
-  this->delx = MatD();
+  this->h = VecD();
+  this->c = VecD();
+  this->u = VecD();
+  this->i = VecD();
+  this->f = VecD();
+  this->o = VecD();
+  this->cTanh = VecD();
+  this->delh = VecD();
+  this->delc = VecD();
+  this->delx = VecD();
 }
 
 LSTM::Grad::Grad(const LSTM& lstm){
   this->Wxi = MatD::Zero(lstm.Wxi.rows(), lstm.Wxi.cols());
   this->Whi = MatD::Zero(lstm.Whi.rows(), lstm.Whi.cols());
-  this->bi = MatD::Zero(lstm.bi.rows(), lstm.bi.cols());
+  this->bi = VecD::Zero(lstm.bi.rows());
 
   this->Wxf = MatD::Zero(lstm.Wxf.rows(), lstm.Wxf.cols());
   this->Whf = MatD::Zero(lstm.Whf.rows(), lstm.Whf.cols());
-  this->bf = MatD::Zero(lstm.bf.rows(), lstm.bf.cols());
+  this->bf = VecD::Zero(lstm.bf.rows());
 
   this->Wxo = MatD::Zero(lstm.Wxo.rows(), lstm.Wxo.cols());
   this->Who = MatD::Zero(lstm.Who.rows(), lstm.Who.cols());
-  this->bo = MatD::Zero(lstm.bo.rows(), lstm.bo.cols());
+  this->bo = VecD::Zero(lstm.bo.rows());
 
   this->Wxu = MatD::Zero(lstm.Wxu.rows(), lstm.Wxu.cols());
   this->Whu = MatD::Zero(lstm.Whu.rows(), lstm.Whu.cols());
-  this->bu = MatD::Zero(lstm.bu.rows(), lstm.bu.cols());
+  this->bu = VecD::Zero(lstm.bu.rows());
 };
 
 void LSTM::Grad::init(){
@@ -160,10 +200,24 @@ void LSTM::Grad::init(){
   this->Wxu.setZero(); this->Whu.setZero(); this->bu.setZero();
 }
 
-double LSTM::Grad::norm(){
+Real LSTM::Grad::norm(){
   return
     this->Wxi.squaredNorm()+this->Whi.squaredNorm()+this->bi.squaredNorm()+
     this->Wxf.squaredNorm()+this->Whf.squaredNorm()+this->bf.squaredNorm()+
     this->Wxo.squaredNorm()+this->Who.squaredNorm()+this->bo.squaredNorm()+
     this->Wxu.squaredNorm()+this->Whu.squaredNorm()+this->bu.squaredNorm();
+}
+
+void LSTM::Grad::operator += (const LSTM::Grad& grad){
+  this->Wxi += grad.Wxi; this->Whi += grad.Whi; this->bi += grad.bi;
+  this->Wxf += grad.Wxf; this->Whf += grad.Whf; this->bf += grad.bf;
+  this->Wxo += grad.Wxo; this->Who += grad.Who; this->bo += grad.bo;
+  this->Wxu += grad.Wxu; this->Whu += grad.Whu; this->bu += grad.bu;
+}
+
+void LSTM::Grad::operator /= (const Real val){
+  this->Wxi /= val; this->Whi /= val; this->bi /= val;
+  this->Wxf /= val; this->Whf /= val; this->bf /= val;
+  this->Wxo /= val; this->Who /= val; this->bo /= val;
+  this->Wxu /= val; this->Whu /= val; this->bu /= val;
 }

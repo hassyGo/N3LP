@@ -3,7 +3,8 @@ CXX=g++
 EIGEN_LOCATION=$$HOME/local/eigen_new #Change this line to use Eigen
 BUILD_DIR=objs
 
-CXXFLAGS =-Wall
+CXXFLAGS=
+#CXXFLAGS+=-Wall
 CXXFLAGS+=-O3
 CXXFLAGS+=-std=c++0x
 CXXFLAGS+=-lm
@@ -12,8 +13,6 @@ CXXFLAGS+=-fno-schedule-insns2
 CXXFLAGS+=-fexceptions
 CXXFLAGS+=-funroll-loops
 CXXFLAGS+=-march=native
-CXXFLAGS+=-mfpmath=sse
-CXXFLAGS+=-mmmx
 CXXFLAGS+=-m64
 CXXFLAGS+=-DEIGEN_DONT_PARALLELIZE
 CXXFLAGS+=-DEIGEN_NO_DEBUG

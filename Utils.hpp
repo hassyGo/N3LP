@@ -6,11 +6,11 @@
 #include <fstream>
 
 namespace Utils{
-  inline double max(const double& x, const double& y){
+  inline Real max(const Real& x, const Real& y){
     return x > y ? x : y;
   }
 
-  inline double min(const double& x, const double& y){
+  inline Real min(const Real& x, const Real& y){
     return x > y ? y : x;
   }
 
@@ -56,38 +56,58 @@ namespace Utils{
     }
   }
 
-  inline double cosDis(const MatD& a, const MatD& b){
+  template <typename T> inline void swap(std::vector<T>& vec){
+    std::vector<T>().swap(vec);
+  }
+
+  inline Real cosDis(const MatD& a, const MatD& b){
     return (a.array()*b.array()).sum()/(a.norm()*b.norm());
     //return a.col(0).dot(b.col(0))/(a.norm()*b.norm());
   }
 
-  inline void infNan(const double& x){
+  inline void infNan(const Real& x){
     assert(!isnan(x) && !isinf(x));
   }
 
   inline void save(std::ofstream& ofs, const MatD& params){
-    double val = 0.0;
+    Real val = 0.0;
     
     for (int i = 0; i < params.cols(); ++i){
       for (int j = 0; j < params.rows(); ++j){
 	val = params.coeff(j, i);
-	ofs.write((char*)&val, sizeof(double));
+	ofs.write((char*)&val, sizeof(Real));
       }
+    }
+  }
+  inline void save(std::ofstream& ofs, const VecD& params){
+    Real val = 0.0;
+    
+    for (int i = 0; i < params.rows(); ++i){
+      val = params.coeff(i, 0);
+      ofs.write((char*)&val, sizeof(Real));
     }
   }
 
   inline void load(std::ifstream& ifs, MatD& params){
-    double val = 0.0;
+    Real val = 0.0;
     
     for (int i = 0; i < params.cols(); ++i){
       for (int j = 0; j < params.rows(); ++j){
-	ifs.read((char*)&val, sizeof(double));
+	ifs.read((char*)&val, sizeof(Real));
 	params.coeffRef(j, i) = val;
       }
     }
   }
+  inline void load(std::ifstream& ifs, VecD& params){
+    Real val = 0.0;
+    
+    for (int i = 0; i < params.rows(); ++i){
+      ifs.read((char*)&val, sizeof(Real));
+      params.coeffRef(i, 0) = val;
+    }
+  }
 
-  inline double stdDev(const Eigen::MatrixXd& input){
+  inline Real stdDev(const Eigen::MatrixXd& input){
     return ::sqrt(((Eigen::MatrixXd)((input.array()-input.sum()/input.rows()).pow(2.0))).sum()/(input.rows()-1));
   }
 }
