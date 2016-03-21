@@ -6,18 +6,18 @@
 GRU::GRU(const int inputDim, const int hiddenDim){
   this->Wxr = MatD(hiddenDim, inputDim);
   this->Whr = MatD(hiddenDim, hiddenDim);
-  this->br = MatD::Zero(hiddenDim, 1);
+  this->br = VecD::Zero(hiddenDim);
 
   this->Wxz = MatD(hiddenDim, inputDim);
   this->Whz = MatD(hiddenDim, hiddenDim);
-  this->bz = MatD::Zero(hiddenDim, 1);
+  this->bz = VecD::Zero(hiddenDim);
 
   this->Wxu = MatD(hiddenDim, inputDim);
   this->Whu = MatD(hiddenDim, hiddenDim);
-  this->bu = MatD::Zero(hiddenDim, 1);
+  this->bu = VecD::Zero(hiddenDim);
 }
 
-void GRU::init(Rand& rnd, const double scale){
+void GRU::init(Rand& rnd, const Real scale){
   rnd.uniform(this->Wxr, scale);
   rnd.uniform(this->Whr, scale);
 
@@ -32,7 +32,7 @@ void GRU::init(Rand& rnd, const double scale){
   this->Whu = Eigen::JacobiSVD<MatD>(this->Whu, Eigen::ComputeFullV|Eigen::ComputeFullU).matrixU();
 }
 
-void GRU::forward(const MatD& xt, const GRU::State* prev, GRU::State* cur){
+void GRU::forward(const VecD& xt, const GRU::State* prev, GRU::State* cur){
   cur->r = this->br + this->Wxr*xt + this->Whr*prev->h;
   cur->z = this->bz + this->Wxz*xt + this->Whz*prev->h;
 
@@ -45,8 +45,8 @@ void GRU::forward(const MatD& xt, const GRU::State* prev, GRU::State* cur){
   cur->h = (1.0-cur->z.array())*prev->h.array() + cur->z.array()*cur->u.array();
 }
 
-void GRU::backward(GRU::State* prev, GRU::State* cur, GRU::Grad& grad, const MatD& xt){
-  MatD delr, delz, delu, delrh;
+void GRU::backward(GRU::State* prev, GRU::State* cur, GRU::Grad& grad, const VecD& xt){
+  VecD delr, delz, delu, delrh;
 
   delz = ActFunc::logisticPrime(cur->z).array()*cur->delh.array()*(cur->u-prev->h).array();
   delu = ActFunc::tanhPrime(cur->u).array()*cur->delh.array()*cur->z.array();
@@ -79,7 +79,7 @@ void GRU::backward(GRU::State* prev, GRU::State* cur, GRU::Grad& grad, const Mat
   grad.bu += delu;
 }
 
-void GRU::sgd(const GRU::Grad& grad, const double learningRate){
+void GRU::sgd(const GRU::Grad& grad, const Real learningRate){
   this->Wxr -= learningRate*grad.Wxr;
   this->Whr -= learningRate*grad.Whr;
   this->br -= learningRate*grad.br;
@@ -106,27 +106,27 @@ void GRU::load(std::ifstream& ifs){
 }
 
 void GRU::State::clear(){
-  this->h = MatD();
-  this->u = MatD();
-  this->r = MatD();
-  this->z = MatD();
-  this->rh = MatD();
-  this->delh = MatD();
-  this->delx = MatD();
+  this->h = VecD();
+  this->u = VecD();
+  this->r = VecD();
+  this->z = VecD();
+  this->rh = VecD();
+  this->delh = VecD();
+  this->delx = VecD();
 }
 
 GRU::Grad::Grad(const GRU& gru){
   this->Wxr = MatD::Zero(gru.Wxr.rows(), gru.Wxr.cols());
   this->Whr = MatD::Zero(gru.Whr.rows(), gru.Whr.cols());
-  this->br = MatD::Zero(gru.br.rows(), gru.br.cols());
+  this->br = VecD::Zero(gru.br.rows());
 
   this->Wxz = MatD::Zero(gru.Wxz.rows(), gru.Wxz.cols());
   this->Whz = MatD::Zero(gru.Whz.rows(), gru.Whz.cols());
-  this->bz = MatD::Zero(gru.bz.rows(), gru.bz.cols());
+  this->bz = VecD::Zero(gru.bz.rows());
 
   this->Wxu = MatD::Zero(gru.Wxu.rows(), gru.Wxu.cols());
   this->Whu = MatD::Zero(gru.Whu.rows(), gru.Whu.cols());
-  this->bu = MatD::Zero(gru.bu.rows(), gru.bu.cols());
+  this->bu = VecD::Zero(gru.bu.rows());
 };
 
 void GRU::Grad::init(){
@@ -135,7 +135,7 @@ void GRU::Grad::init(){
   this->Wxu.setZero(); this->Whu.setZero(); this->bu.setZero();
 }
 
-double GRU::Grad::norm(){
+Real GRU::Grad::norm(){
   return
     this->Wxr.squaredNorm()+this->Whr.squaredNorm()+this->br.squaredNorm()+
     this->Wxz.squaredNorm()+this->Whz.squaredNorm()+this->bz.squaredNorm()+
@@ -148,7 +148,7 @@ void GRU::Grad::operator += (const GRU::Grad& grad){
   this->Wxu += grad.Wxu; this->Whu += grad.Whu; this->bu += grad.bu;
 }
 
-void GRU::Grad::operator /= (const double val){
+void GRU::Grad::operator /= (const Real val){
   this->Wxr /= val; this->Whr /= val; this->br /= val;
   this->Wxz /= val; this->Whz /= val; this->bz /= val;
   this->Wxu /= val; this->Whu /= val; this->bu /= val;

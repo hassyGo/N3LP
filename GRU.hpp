@@ -12,24 +12,24 @@ public:
   class State;
   class Grad;
 
-  MatD Wxr, Whr, br;
-  MatD Wxz, Whz, bz;
-  MatD Wxu, Whu, bu;
+  MatD Wxr, Whr; VecD br;
+  MatD Wxz, Whz; VecD bz;
+  MatD Wxu, Whu; VecD bu;
 
-  void init(Rand& rnd, const double scale = 1.0);
-  virtual void forward(const MatD& xt, const GRU::State* prev, GRU::State* cur);
-  virtual void backward(GRU::State* prev, GRU::State* cur, GRU::Grad& grad, const MatD& xt);
-  void sgd(const GRU::Grad& grad, const double learningRate);
+  void init(Rand& rnd, const Real scale = 1.0);
+  virtual void forward(const VecD& xt, const GRU::State* prev, GRU::State* cur);
+  virtual void backward(GRU::State* prev, GRU::State* cur, GRU::Grad& grad, const VecD& xt);
+  void sgd(const GRU::Grad& grad, const Real learningRate);
   void save(std::ofstream& ofs);
   void load(std::ifstream& ifs);
 };
 
 class GRU::State{
 public:
-  MatD h, u, r, z;
-  MatD rh;
+  VecD h, u, r, z;
+  VecD rh;
 
-  MatD delh, delx; //for backprop
+  VecD delh, delx; //for backprop
 
   void clear();
 };
@@ -39,13 +39,13 @@ public:
   Grad(){}
   Grad(const GRU& gru);
 
-  MatD Wxr, Whr, br;
-  MatD Wxz, Whz, bz;
-  MatD Wxu, Whu, bu;
+  MatD Wxr, Whr; VecD br;
+  MatD Wxz, Whz; VecD bz;
+  MatD Wxu, Whu; VecD bu;
 
   void init();
-  double norm();
+  Real norm();
 
   void operator += (const GRU::Grad& grad);
-  void operator /= (const double val);
+  void operator /= (const Real val);
 };
