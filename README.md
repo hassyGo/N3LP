@@ -12,11 +12,11 @@ See [1, 2] for the simplified version of the LSTM implemented here.
 [2] http://nlp.stanford.edu/pubs/tai-socher-manning-acl2015.pdf
 
 ## BlackOut sampling
-BlackOut [1, 2] is an approximation method to softmax classification learning with the large number of classes.
+BlackOut [3, 4] is an approximation method to softmax classification learning with the large number of classes.
 
-[1] http://arxiv.org/abs/1511.06909
+[3] http://arxiv.org/abs/1511.06909
 
-[2] https://github.com/IntelLabs/rnnlm
+[4] https://github.com/IntelLabs/rnnlm
 
 ## USAGE ##
 1) modify the line in Makefile to use Eigen<br>
