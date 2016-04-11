@@ -31,6 +31,8 @@ public:
 
 class TreeLSTM::State: public LSTM::State{
 public:
+  ~State() {this->clear();};
+
   VecD fl, fr;
 
   void clear();

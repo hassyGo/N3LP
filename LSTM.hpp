@@ -1,13 +1,14 @@
 #pragma once
 
-#include "Matrix.hpp"
-#include "Rand.hpp"
+#include <Matrix.hpp>
+#include <Rand.hpp>
 #include <fstream>
 
 class LSTM{
 public:
   LSTM(){};
   LSTM(const int inputDim, const int hiddenDim);
+  LSTM(const int inputDim, const int additionalInputDim, const int hiddenDim);
 
   class State;
   class Grad;
@@ -25,14 +26,20 @@ public:
   void sgd(const LSTM::Grad& grad, const Real learningRate);
   void save(std::ofstream& ofs);
   void load(std::ifstream& ifs);
+
+  MatD Wai, Waf, Wao, Wau; //for additional input
+  virtual void forward(const VecD& xt, const VecD& at, const LSTM::State* prev, LSTM::State* cur);
+  virtual void backward(LSTM::State* prev, LSTM::State* cur, LSTM::Grad& grad, const VecD& xt, const VecD& at);
 };
 
 class LSTM::State{
 public:
+  virtual ~State() {this->clear();};
+
   VecD h, c, u, i, f, o;
   VecD cTanh;
 
-  VecD delh, delc, delx; //for backprop
+  VecD delh, delc, delx, dela; //for backprop
 
   virtual void clear();
 };
@@ -46,6 +53,8 @@ public:
   MatD Wxf, Whf; VecD bf;
   MatD Wxo, Who; VecD bo;
   MatD Wxu, Whu; VecD bu;
+
+  MatD Wai, Waf, Wao, Wau;
 
   void init();
   Real norm();
