@@ -1,6 +1,6 @@
 #include "LSTM.hpp"
 #include "ActFunc.hpp"
-#include <Utils.hpp>
+#include "Utils.hpp"
 
 LSTM::LSTM(const int inputDim, const int hiddenDim){
   this->Wxi = MatD(hiddenDim, inputDim);

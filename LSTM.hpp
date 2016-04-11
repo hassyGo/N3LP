@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Matrix.hpp>
-#include <Rand.hpp>
+#include "Matrix.hpp"
+#include "Rand.hpp"
 #include <fstream>
 
 class LSTM{
