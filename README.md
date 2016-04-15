@@ -27,8 +27,6 @@ EIGEN_LOCATION=$$HOME/local/eigen_new #Change this line to use Eigen
 3) ./run the command "n3lp", and then the seq2seq model training starts (currently)
 
 ## Projects using N3LP ##
-* Tree-to-Sequence Attentional Neural Machine Translation
-
-Paper: http://arxiv.org/abs/1603.06075
-
+* Tree-to-Sequence Attentional Neural Machine Translation  
+Paper: http://arxiv.org/abs/1603.06075  
 Code: https://github.com/tempra28/tree2seq
