@@ -20,8 +20,8 @@ public:
   MatD Wxu, WhuL, WhuR; VecD bu; //for the memory cell
 
   void init(Rand& rnd, const Real scale = 1.0);
-  void forward(const VecD& xt, TreeLSTM::State* parent, TreeLSTM::State* left, TreeLSTM::State* right);
-  void backward(TreeLSTM::State* parent, TreeLSTM::State* left, TreeLSTM::State* right, TreeLSTM::Grad& grad, const VecD& xt);
+  void forward(const VecD& xt, TreeLSTM::State* parent, LSTM::State* left, LSTM::State* right);
+  void backward(TreeLSTM::State* parent, LSTM::State* left, LSTM::State* right, TreeLSTM::Grad& grad, const VecD& xt);
   void forward(TreeLSTM::State* parent, LSTM::State* left, LSTM::State* right);
   void backward(TreeLSTM::State* parent, LSTM::State* left, LSTM::State* right, TreeLSTM::Grad& grad);
   void sgd(const TreeLSTM::Grad& grad, const Real learningRate);

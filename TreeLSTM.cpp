@@ -51,7 +51,7 @@ void TreeLSTM::init(Rand& rnd, const Real scale){
   rnd.uniform(this->WhuR, scale);
 }
 
-void TreeLSTM::forward(const VecD& xt, TreeLSTM::State* parent, TreeLSTM::State* left, TreeLSTM::State* right){
+void TreeLSTM::forward(const VecD& xt, TreeLSTM::State* parent, LSTM::State* left, LSTM::State* right){
   parent->i = this->bi;
   parent->i.noalias() += this->Wxi*xt + this->WhiL*left->h + this->WhiR*right->h;
   parent->fl = this->bfl;
@@ -97,7 +97,7 @@ void TreeLSTM::forward(TreeLSTM::State* parent, LSTM::State* left, LSTM::State* 
   parent->h = parent->o.array()*parent->cTanh.array();
 }
 
-void TreeLSTM::backward(TreeLSTM::State* parent, TreeLSTM::State* left, TreeLSTM::State* right, TreeLSTM::Grad& grad, const VecD& xt){
+void TreeLSTM::backward(TreeLSTM::State* parent, LSTM::State* left, LSTM::State* right, TreeLSTM::Grad& grad, const VecD& xt){
   VecD delo, deli, delu, delfl, delfr;
 
   parent->delc.array() += ActFunc::tanhPrime(parent->cTanh).array()*parent->delh.array()*parent->o.array();
