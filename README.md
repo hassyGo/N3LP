@@ -28,3 +28,7 @@ Feel free to tell me (hassy@logos.t.u-tokyo.ac.jp) if you are using N3LP or have
 * Tree-to-Sequence Attentional Neural Machine Translation  
 Paper: http://arxiv.org/abs/1603.06075<br>
 Code: https://github.com/tempra28/tree2seq
+
+## Contributors ##
+* <a href="http://www.logos.t.u-tokyo.ac.jp/~hassy/">Kazuma Hashimoto</a> - Mainly developing this project
+* <a href="http://www.logos.t.u-tokyo.ac.jp/~eriguchi/">Akiko Eriguchi</a> - Developing practical applications (e.g. <a href="https://github.com/tempra28/tree2seq">tree-to-sequence neural machine translation</a>)
