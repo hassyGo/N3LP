@@ -8,9 +8,6 @@ CXXFLAGS=
 CXXFLAGS+=-O3
 CXXFLAGS+=-std=c++0x
 CXXFLAGS+=-lm
-CXXFLAGS+=-fomit-frame-pointer
-CXXFLAGS+=-fno-schedule-insns2
-CXXFLAGS+=-fexceptions
 CXXFLAGS+=-funroll-loops
 CXXFLAGS+=-march=native
 CXXFLAGS+=-m64
