@@ -32,3 +32,6 @@ Code: https://github.com/tempra28/tree2seq
 ## Contributors ##
 * <a href="http://www.logos.t.u-tokyo.ac.jp/~hassy/">Kazuma Hashimoto</a> - Mainly developing this project
 * <a href="http://www.logos.t.u-tokyo.ac.jp/~eriguchi/">Akiko Eriguchi</a> - Developing practical applications (e.g. <a href="https://github.com/tempra28/tree2seq">tree-to-sequence neural machine translation</a>)
+
+## Licence ##
+MIT licence
