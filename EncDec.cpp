@@ -5,8 +5,8 @@
 #include <sys/time.h>
 #include <omp.h>
 
-EncDec::EncDec(Vocabulary& sourceVoc_, Vocabulary& targetVoc_, std::vector<EncDec::Data*>& trainData_, std::vector<EncDec::Data*>& devData_, const int inputDim, const int hiddenDim):
-  sourceVoc(sourceVoc_), targetVoc(targetVoc_), trainData(trainData_), devData(devData_)
+EncDec::EncDec(Vocabulary& sourceVoc_, Vocabulary& targetVoc_, std::vector<EncDec::Data*>& trainData_, std::vector<EncDec::Data*>& devData_, const int inputDim, const int hiddenDim, const bool useBlackout_):
+  useBlackout(useBlackout_), sourceVoc(sourceVoc_), targetVoc(targetVoc_), trainData(trainData_), devData(devData_)
 {
   const Real scale = 0.1;
 
@@ -24,7 +24,21 @@ EncDec::EncDec(Vocabulary& sourceVoc_, Vocabulary& targetVoc_, std::vector<EncDe
   this->enc.bf.fill(1.0);
   this->dec.bf.fill(1.0);
 
-  this->softmax = SoftMax(hiddenDim, this->targetVoc.tokenList.size());
+  if (!this->useBlackout){
+    this->softmax = SoftMax(hiddenDim, this->targetVoc.tokenList.size());
+  }
+  else {
+    const int sampleNum = 100;
+    const Real alpha = 0.4;
+    VecD freq = VecD(this->targetVoc.tokenList.size());
+    
+    for (int i = 0; i < (int)this->targetVoc.tokenList.size(); ++i){
+      freq.coeffRef(i, 0) = this->targetVoc.tokenList[i]->count;
+    }
+
+    this->blackout = BlackOut(hiddenDim, this->targetVoc.tokenList.size(), sampleNum);
+    this->blackout.initSampling(freq, alpha);
+  }
 
   for (int j = 0; j < (int)this->devData.size(); ++j){
     this->encStateDev.push_back(std::vector<LSTM::State*>());
@@ -89,7 +103,13 @@ void EncDec::translate(const std::vector<int>& src, const int beam, const int ma
 	this->dec.forward(this->targetEmbed.col(candidate[j].tgt[i-1]), candidate[j].decState[i-1], candidate[j].decState[i]);
       }
 
-      this->softmax.calcDist(candidate[j].decState[i]->h, targetDist);
+      if (!this->useBlackout){
+	this->softmax.calcDist(candidate[j].decState[i]->h, targetDist);
+      }
+      else {
+	this->blackout.calcDist(candidate[j].decState[i]->h, targetDist);
+      }
+
       score.col(j).array() = candidate[j].score+targetDist.array().log();
     }
 
@@ -179,7 +199,13 @@ bool EncDec::translate(std::vector<int>& output, const std::vector<int>& src, co
 	this->dec.forward(this->targetEmbed.col(candidate[j].tgt[i-1]), candidate[j].decState[i-1], candidate[j].decState[i]);
       }
 
-      this->softmax.calcDist(candidate[j].decState[i]->h, targetDist);
+      if (!this->useBlackout){
+	this->softmax.calcDist(candidate[j].decState[i]->h, targetDist);
+      }
+      else {
+	this->blackout.calcDist(candidate[j].decState[i]->h, targetDist);
+      }
+
       score.col(j).array() = candidate[j].score+targetDist.array().log();
     }
 
@@ -253,8 +279,14 @@ Real EncDec::calcLoss(EncDec::Data* data, std::vector<LSTM::State*>& encState, s
       this->dec.forward(this->targetEmbed.col(data->tgt[i-1]), decState[i-1], decState[i]);
     }
 
-    this->softmax.calcDist(decState[i]->h, targetDist);
-    loss += this->softmax.calcLoss(targetDist, data->tgt[i]);
+    if (!this->useBlackout){
+      this->softmax.calcDist(decState[i]->h, targetDist);
+      loss += this->softmax.calcLoss(targetDist, data->tgt[i]);
+    }
+    else {
+      this->blackout.calcDist(decState[i]->h, targetDist);
+      loss += this->blackout.calcLoss(targetDist, data->tgt[i]);
+    }
   }
   
   return loss;
@@ -275,7 +307,13 @@ Real EncDec::calcPerplexity(EncDec::Data* data, std::vector<LSTM::State*>& encSt
       this->dec.forward(this->targetEmbed.col(data->tgt[i-1]), decState[i-1], decState[i]);
     }
 
-    this->softmax.calcDist(decState[i]->h, targetDist);
+    if (!this->useBlackout){
+      this->softmax.calcDist(decState[i]->h, targetDist);
+    }
+    else {
+      this->blackout.calcDist(decState[i]->h, targetDist);
+    }
+
     perp -= log(targetDist.coeff(data->tgt[i], 0));
   }
   
@@ -321,9 +359,17 @@ void EncDec::train(EncDec::Data* data, std::vector<LSTM::State*>& encState, std:
       this->dec.forward(this->targetEmbed.col(data->tgt[i-1]), decState[i-1], decState[i]);
     }
 
-    this->softmax.calcDist(decState[i]->h, targetDist);
-    loss += this->softmax.calcLoss(targetDist, data->tgt[i]);
-    this->softmax.backward(decState[i]->h, targetDist, data->tgt[i], decState[i]->delh, grad.softmaxGrad);
+    if (!this->useBlackout){
+      this->softmax.calcDist(decState[i]->h, targetDist);
+      loss += this->softmax.calcLoss(targetDist, data->tgt[i]);
+      this->softmax.backward(decState[i]->h, targetDist, data->tgt[i], decState[i]->delh, grad.softmaxGrad);
+    }
+    else {
+      this->blackout.sampling(data->tgt[i], grad.blackoutState);
+      this->blackout.calcSampledDist(decState[i]->h, targetDist, grad.blackoutState);
+      loss += this->blackout.calcSampledLoss(targetDist);
+      this->blackout.backward(decState[i]->h, targetDist, grad.blackoutState, decState[i]->delh, grad.blackoutGrad);
+    }
   }
 
   decState[data->tgt.size()-1]->delc = this->zeros;
@@ -383,6 +429,7 @@ void EncDec::trainOpenMP(const Real learningRate, const int miniBatchSize, const
     grad.lstmSrcGrad = LSTM::Grad(this->enc);
     grad.lstmTgtGrad = LSTM::Grad(this->dec);
     grad.softmaxGrad = SoftMax::Grad(this->softmax);
+    grad.blackoutGrad = BlackOut::Grad();
 
     //std::sort(this->trainData.begin(), this->trainData.end(), sort_pred());
   }
@@ -420,7 +467,12 @@ void EncDec::trainOpenMP(const Real learningRate, const int miniBatchSize, const
     this->enc.sgd(grad.lstmSrcGrad, lr);
     this->dec.sgd(grad.lstmTgtGrad, lr);
 
-    this->softmax.sgd(grad.softmaxGrad, lr);
+    if (!this->useBlackout){
+      this->softmax.sgd(grad.softmaxGrad, lr);
+    }
+    else {
+      this->blackout.sgd(grad.blackoutGrad, lr);
+    }
 
     for (auto it = grad.sourceEmbed.begin(); it != grad.sourceEmbed.end(); ++it){
       this->sourceEmbed.col(it->first) -= lr*it->second;
@@ -484,7 +536,7 @@ void EncDec::demo(const std::string& srcTrain, const std::string& tgtTrain, cons
       trainData.back()->src.push_back(sourceVoc.tokenIndex.count(*it) ? sourceVoc.tokenIndex.at(*it) : sourceVoc.unkIndex);
     }
 
-    std::reverse(trainData.back()->src.begin(), trainData.back()->src.end());
+    //std::reverse(trainData.back()->src.begin(), trainData.back()->src.end());
     trainData.back()->src.push_back(sourceVoc.eosIndex);
   }
 
@@ -510,7 +562,7 @@ void EncDec::demo(const std::string& srcTrain, const std::string& tgtTrain, cons
       devData.back()->src.push_back(sourceVoc.tokenIndex.count(*it) ? sourceVoc.tokenIndex.at(*it) : sourceVoc.unkIndex);
     }
 
-    std::reverse(devData.back()->src.begin(), devData.back()->src.end());
+    //std::reverse(devData.back()->src.begin(), devData.back()->src.end());
     devData.back()->src.push_back(sourceVoc.eosIndex);
   }
 
@@ -530,7 +582,8 @@ void EncDec::demo(const std::string& srcTrain, const std::string& tgtTrain, cons
   const int hiddenDim = 50;
   const int miniBatchSize = 1;
   const int numThread = 1;
-  EncDec encdec(sourceVoc, targetVoc, trainData, devData, inputDim, hiddenDim);
+  const bool useBlackout = true;
+  EncDec encdec(sourceVoc, targetVoc, trainData, devData, inputDim, hiddenDim, useBlackout);
   auto test = trainData[0]->src;
 
   std::cout << "# of training data:    " << trainData.size() << std::endl;
@@ -538,7 +591,7 @@ void EncDec::demo(const std::string& srcTrain, const std::string& tgtTrain, cons
   std::cout << "Source voc size: " << sourceVoc.tokenIndex.size() << std::endl;
   std::cout << "Target voc size: " << targetVoc.tokenIndex.size() << std::endl;
   
-  for (int i = 0; i < 100; ++i){
+  for (int i = 0; i < 30; ++i){
     if (i+1 >= 6){
       //learningRate *= 0.5;
     }
@@ -591,6 +644,13 @@ void EncDec::save(const std::string& fileName){
   this->dec.save(ofs);
   Utils::save(ofs, sourceEmbed);
   Utils::save(ofs, targetEmbed);
+
+  if (this->useBlackout){
+    this->blackout.save(ofs);
+  }
+  else {
+    this->softmax.save(ofs);
+  }
 }
 
 void EncDec::load(const std::string& fileName){
@@ -602,4 +662,11 @@ void EncDec::load(const std::string& fileName){
   this->dec.load(ifs);
   Utils::load(ifs, sourceEmbed);
   Utils::load(ifs, targetEmbed);
+
+  if (this->useBlackout){
+    this->blackout.load(ifs);
+  }
+  else {
+    this->softmax.load(ifs);
+  }
 }

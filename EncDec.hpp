@@ -3,6 +3,7 @@
 #include "LSTM.hpp"
 #include "Vocabulary.hpp"
 #include "SoftMax.hpp"
+#include "BlackOut.hpp"
 
 class EncDec{
 public:
@@ -13,8 +14,10 @@ public:
 
   EncDec(Vocabulary& sourceVoc_, Vocabulary& targetVoc_,
 	 std::vector<EncDec::Data*>& trainData_, std::vector<EncDec::Data*>& devData_,
-	 const int inputDim, const int hiddenDim);
+	 const int inputDim, const int hiddenDim,
+	 const bool useBlackout_);
 
+  bool useBlackout;
   Rand rnd;
   Vocabulary& sourceVoc;
   Vocabulary& targetVoc;
@@ -22,6 +25,7 @@ public:
   std::vector<EncDec::Data*>& devData;
   LSTM enc, dec;
   SoftMax softmax;
+  BlackOut blackout;
   MatD sourceEmbed;
   MatD targetEmbed;
   VecD zeros;
@@ -53,6 +57,8 @@ public:
   LSTM::Grad lstmSrcGrad;
   LSTM::Grad lstmTgtGrad;
   SoftMax::Grad softmaxGrad;
+  BlackOut::Grad blackoutGrad;
+  BlackOut::State blackoutState;
 
   void init(){
     this->sourceEmbed.clear();
@@ -60,10 +66,11 @@ public:
     this->lstmSrcGrad.init();
     this->lstmTgtGrad.init();
     this->softmaxGrad.init();
+    this->blackoutGrad.init();
   }
 
   Real norm(){
-    Real res = this->lstmSrcGrad.norm()+this->lstmTgtGrad.norm()+this->softmaxGrad.norm();
+    Real res = this->lstmSrcGrad.norm()+this->lstmTgtGrad.norm()+this->softmaxGrad.norm()+this->blackoutGrad.norm();
 
     for (auto it = this->sourceEmbed.begin(); it != this->sourceEmbed.end(); ++it){
       res += it->second.squaredNorm();
@@ -79,6 +86,7 @@ public:
     this->lstmSrcGrad += grad.lstmSrcGrad;
     this->lstmTgtGrad += grad.lstmTgtGrad;
     this->softmaxGrad += grad.softmaxGrad;
+    this->blackoutGrad += grad.blackoutGrad;
 
     for (auto it = grad.sourceEmbed.begin(); it != grad.sourceEmbed.end(); ++it){
       if (this->sourceEmbed.count(it->first)){
@@ -131,7 +139,14 @@ public:
   {
     this->grad.lstmSrcGrad = LSTM::Grad(this->encdec.enc);
     this->grad.lstmTgtGrad = LSTM::Grad(this->encdec.dec);
-    this->grad.softmaxGrad = SoftMax::Grad(this->encdec.softmax);
+
+    if (this->encdec.useBlackout){
+      this->grad.blackoutState = BlackOut::State(this->encdec.blackout);
+      this->grad.blackoutGrad = BlackOut::Grad();
+    }
+    else {
+      this->grad.softmaxGrad = SoftMax::Grad(this->encdec.softmax);
+    }
   };
 
   int beg, end;
