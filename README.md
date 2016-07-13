@@ -1,7 +1,7 @@
 # N3LP
 C++ implementation for Neural Network-based NLP, such as LSTM machine translation!<br>
 This project ONLY requires a template library for linear algebra, Eigen (http://eigen.tuxfamily.org/index.php?title=Main_Page)<br>
-<font color="red">Please note that this project started just for fun and just for my hobby, but sometimes it can be used to develop state-of-the-art models!</font>
+<b>Please note that this project started just for fun as my hobby, but sometimes it can be used to develop state-of-the-art models!</b>
 
 ## Long Short-Term Memory (LSTM)
 The LSTM implemented in this project employs a variant of the major LSTM's gate computation where previous cell states are used to compute input/output gates.
