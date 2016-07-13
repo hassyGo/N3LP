@@ -6,7 +6,7 @@ class SoftMax{
 public:
   SoftMax(){};
   SoftMax(const int inputDim, const int classNum):
-    weight(MatD::Zero(classNum, inputDim)), bias(VecD::Zero(classNum))
+    weight(MatD::Zero(inputDim, classNum)), bias(VecD::Zero(classNum))
   {};
 
   class Grad;

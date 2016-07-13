@@ -3,7 +3,7 @@
 
 void SoftMax::calcDist(const VecD& input, VecD& output){
   output = this->bias;
-  output.noalias() += this->weight*input;
+  output.noalias() += this->weight.transpose()*input;
   output.array() -= output.maxCoeff(); //for numerical stability
   output = output.array().exp();
   output /= output.array().sum();
@@ -17,8 +17,8 @@ void SoftMax::backward(const VecD& input, const VecD& output, const int label, V
   VecD delta = output;
 
   delta.coeffRef(label, 0) -= 1.0;
-  deltaFeature = this->weight.transpose()*delta;
-  grad.weight += delta*input.transpose();
+  deltaFeature = this->weight*delta;
+  grad.weight += input*delta.transpose();
   grad.bias += delta;
 }
 
