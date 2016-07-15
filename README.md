@@ -26,8 +26,8 @@ EIGEN_LOCATION=$$HOME/local/eigen_new #Change this line to use Eigen
 
 ## Projects using N3LP ##
 Feel free to tell me (hassy@logos.t.u-tokyo.ac.jp) if you are using N3LP or have any questions!
-* Tree-to-Sequence Attentional Neural Machine Translation  
-Paper: http://arxiv.org/abs/1603.06075<br>
+* Tree-to-Sequence Attentional Neural Machine Translation, <b>ACL 2016</b>
+Paper: http://www.logos.t.u-tokyo.ac.jp/~eriguchi/paper/ACL2016/ACL2016.pdf<br>
 Code: https://github.com/tempra28/tree2seq
 
 ## Contributors ##
