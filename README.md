@@ -16,6 +16,11 @@ BlackOut [3, 4] is an approximation method to softmax classification learning wi
 [3] http://arxiv.org/abs/1511.06909<br>
 [4] https://github.com/IntelLabs/rnnlm
 
+## Layer Normalization
+Layer Normalization [5] is a normalization method for deep neural networks and it can be easily applied to recurrent neural networks, such as LSTMs.
+
+[5] http://arxiv.org/abs/1607.06450
+
 ## USAGE ##
 1) modify the line in Makefile to use Eigen<br>
 EIGEN_LOCATION=$$HOME/local/eigen_new #Change this line to use Eigen
