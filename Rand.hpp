@@ -11,10 +11,11 @@ public:
     x(123456789), y(362436069), z(521288629), w(w_) {};
 
   unsigned long next();
-  double zero2one();
-  void uniform(MatD& mat, const double scale = 1.0);
-  double gauss(double sigma, double mu = 0.0);
-  void gauss(MatD& mat, double sigma, double mu = 0.0);
+  Real zero2one();
+  void uniform(MatD& mat, const Real scale = 1.0);
+  void uniform(VecD& vec, const Real scale = 1.0);
+  Real gauss(Real sigma, Real mu = 0.0);
+  void gauss(MatD& mat, Real sigma, Real mu = 0.0);
   template <typename T> void shuffle(std::vector<T>& data);
 
 private:
@@ -33,11 +34,11 @@ inline unsigned long Rand::next(){
   return (this->w=(this->w^(this->w>>19))^(this->t^(this->t>>8)));
 }
 
-inline double Rand::zero2one(){
+inline Real Rand::zero2one(){
   return ((this->next()&0xFFFF)+1)/65536.0;
 }
 
-inline void Rand::uniform(MatD& mat, const double scale){
+inline void Rand::uniform(MatD& mat, const Real scale){
   for (int i = 0; i < mat.rows(); ++i){
     for (int j = 0; j < mat.cols(); ++j){
       mat.coeffRef(i, j) = 2.0*this->zero2one()-1.0;
@@ -47,7 +48,15 @@ inline void Rand::uniform(MatD& mat, const double scale){
   mat *= scale;
 }
 
-inline double Rand::gauss(double sigma, double mu){
+inline void Rand::uniform(VecD& vec, const Real scale){
+  for (int i = 0; i < vec.rows(); ++i){
+    vec.coeffRef(i, 0) = 2.0*this->zero2one()-1.0;
+  }
+
+  vec *= scale;
+}
+
+inline Real Rand::gauss(Real sigma, Real mu){
   return
     mu+
     sigma*
@@ -55,7 +64,7 @@ inline double Rand::gauss(double sigma, double mu){
     sin(2.0*M_PI*this->zero2one());
 }
 
-inline void Rand::gauss(MatD& mat, double sigma, double mu){
+inline void Rand::gauss(MatD& mat, Real sigma, Real mu){
   for (int i = 0; i < mat.rows(); ++i){
     for (int j = 0; j < mat.cols(); ++j){
       mat.coeffRef(i, j) = this->gauss(sigma, mu);
