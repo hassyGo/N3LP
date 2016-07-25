@@ -578,8 +578,8 @@ void EncDec::demo(const std::string& srcTrain, const std::string& tgtTrain, cons
   }
 
   Real learningRate = 0.5;
-  const int inputDim = 50;
-  const int hiddenDim = 50;
+  const int inputDim = 100;
+  const int hiddenDim = 100;
   const int miniBatchSize = 1;
   const int numThread = 1;
   const bool useBlackout = true;
@@ -606,6 +606,31 @@ void EncDec::demo(const std::string& srcTrain, const std::string& tgtTrain, cons
     std::ostringstream oss;
     oss << "model." << i+1 << "itr.bin";
     //encdec.save(oss.str());
+  }
+
+  //intereactive translation
+  std::cout << "Interactive translation" << std::endl;
+
+  for (std::string line; std::getline(std::cin, line); ){
+    if (line == ""){
+      continue;
+    }
+
+    EncDec::Data tmp;
+
+    Utils::split(line, tokens);
+
+    for (auto it = tokens.begin(); it != tokens.end(); ++it){
+      tmp.src.push_back(sourceVoc.tokenIndex.count(*it) ? sourceVoc.tokenIndex.at(*it) : sourceVoc.unkIndex);
+    }
+
+    //std::reverse(tmp.src.begin(), tmp.src.end());
+    tmp.src.push_back(sourceVoc.eosIndex);
+
+    std::cout << "### Greedy ###" << std::endl;
+    encdec.translate(tmp.src, 1, 100, 1);
+    std::cout << "### Beam search ###" << std::endl;
+    encdec.translate(tmp.src, 12, 100, 10);
   }
   
   return;
