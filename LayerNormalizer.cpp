@@ -1,14 +1,15 @@
 #include "LayerNormalizer.hpp"
 #include "Utils.hpp"
+#include <iostream>
 
 LayerNormalizer::LayerNormalizer(const int dim){
   this->g = VecD(dim);
   this->b = VecD(dim);
 }
 
-void LayerNormalizer::init(Rand& rnd, const Real scale){
-  rnd.uniform(this->g, scale);
-  rnd.uniform(this->b, scale);
+void LayerNormalizer::init(){
+  this->g.fill(1.0);
+  this->b.fill(0.0);
 }
 
 void LayerNormalizer::forward(VecD& at, LayerNormalizer::State* state){
@@ -32,12 +33,11 @@ void LayerNormalizer::backward(const VecD& delat, VecD& delatOrig, LayerNormaliz
   grad.b += delat;
   grad.g += (1.0/state->sigma)*delxt;
 
-  delmu = -delyt.sum();
-  delsigma = -(delxt.dot(this->g))/(state->sigma*state->sigma);
+  delsigma = -delxt.dot(this->g)/(state->sigma*state->sigma);
   delatOrig = (delsigma/(state->sigma*H))*state->yt;
-  delmu += -delatOrig.sum();
+  delmu = -delyt.sum()-delatOrig.sum();
   delatOrig += delyt;
-  delatOrig.array() -= delmu/H;
+  delatOrig.array() += delmu/H;
 }
 
 void LayerNormalizer::sgd(const LayerNormalizer::Grad& grad, const Real learningRate){

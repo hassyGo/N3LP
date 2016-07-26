@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Matrix.hpp"
-#include "Rand.hpp"
 
 class LayerNormalizer{
 public:
@@ -13,7 +12,7 @@ public:
 
   VecD g, b;
 
-  void init(Rand& rnd, const Real scale = 1.0);
+  void init();
   void forward(VecD& at, LayerNormalizer::State* state);
   void backward(const VecD& delat, VecD& delatOrig, LayerNormalizer::State* state, LayerNormalizer::Grad& grad);
   void sgd(const LayerNormalizer::Grad& grad, const Real learningRate);

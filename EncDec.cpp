@@ -446,7 +446,7 @@ void EncDec::trainOpenMP(const Real learningRate, const int miniBatchSize, const
 
 #pragma omp parallel for num_threads(numThreads) schedule(dynamic) shared(args)
     for (int i = it->first; i <= it->second; ++i){
-      int id = omp_get_thread_num();
+      int id = 0;//omp_get_thread_num();
       Real loss;
       this->train(this->trainData[i], args[id]->encState, args[id]->decState, args[id]->grad, loss);
       args[id]->loss += loss;
@@ -578,8 +578,8 @@ void EncDec::demo(const std::string& srcTrain, const std::string& tgtTrain, cons
   }
 
   Real learningRate = 0.5;
-  const int inputDim = 100;
-  const int hiddenDim = 100;
+  const int inputDim = 200;
+  const int hiddenDim = 200;
   const int miniBatchSize = 1;
   const int numThread = 1;
   const bool useBlackout = true;
