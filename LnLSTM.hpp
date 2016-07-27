@@ -30,6 +30,7 @@ public:
 class LnLSTM::State: public LSTM::State{
 public:
   State(): lnsh(new LayerNormalizer::State), lnsx(new LayerNormalizer::State), lnsc(new LayerNormalizer::State), lnsa(new LayerNormalizer::State){}
+  ~State() {this->clear();}
 
   LayerNormalizer::State* lnsh;
   LayerNormalizer::State* lnsx;
@@ -37,6 +38,8 @@ public:
   LayerNormalizer::State* lnsa;
   VecD lnhConcat, lnxConcat, lnaConcat;
   VecD delConcat;
+
+  void clear();
 };
 
 class LnLSTM::Grad: public LSTM::Grad{

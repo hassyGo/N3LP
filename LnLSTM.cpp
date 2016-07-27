@@ -302,6 +302,19 @@ void LnLSTM::load(std::ifstream& ifs){
   this->lna.load(ifs);
 }
 
+void LnLSTM::State::clear(){
+  LSTM::State::clear();
+
+  this->lnsh->clear();
+  this->lnsx->clear();
+  this->lnsc->clear();
+  this->lnsa->clear();
+  this->lnhConcat = VecD();
+  this->lnxConcat = VecD();
+  this->lnaConcat = VecD();
+  this->delConcat = VecD();
+}
+
 LnLSTM::Grad::Grad(const LnLSTM& lnlstm):
   LSTM::Grad(lnlstm)
 {
