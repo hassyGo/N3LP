@@ -19,6 +19,8 @@ public:
   MatD Wxu, Whu; VecD bu; //for the memory cell
 
   void init(Rand& rnd, const Real scale = 1.0);
+  void activate(LSTM::State* cur);
+  void activate(const LSTM::State* prev, LSTM::State* cur);
   virtual void forward(const VecD& xt, const LSTM::State* prev, LSTM::State* cur);
   virtual void forward(const VecD& xt, LSTM::State* cur);
   virtual void backward(LSTM::State* prev, LSTM::State* cur, LSTM::Grad& grad, const VecD& xt);
@@ -29,7 +31,9 @@ public:
 
   MatD Wai, Waf, Wao, Wau; //for additional input
   virtual void forward(const VecD& xt, const VecD& at, const LSTM::State* prev, LSTM::State* cur);
+  virtual void forward(const VecD& xt, const VecD& at, LSTM::State* cur);
   virtual void backward(LSTM::State* prev, LSTM::State* cur, LSTM::Grad& grad, const VecD& xt, const VecD& at);
+  virtual void backward(LSTM::State* cur, LSTM::Grad& grad, const VecD& xt, const VecD& at);
 };
 
 class LSTM::State{

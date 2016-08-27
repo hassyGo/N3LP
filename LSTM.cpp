@@ -62,6 +62,27 @@ void LSTM::init(Rand& rnd, const Real scale){
   rnd.uniform(this->Wau, scale);
 }
 
+void LSTM::activate(const LSTM::State* prev, LSTM::State* cur){
+  ActFunc::logistic(cur->i);
+  ActFunc::logistic(cur->f);
+  ActFunc::logistic(cur->o);
+  ActFunc::tanh(cur->u);
+  cur->c = cur->i.array()*cur->u.array() + cur->f.array()*prev->c.array();
+  cur->cTanh = cur->c;
+  ActFunc::tanh(cur->cTanh);
+  cur->h = cur->o.array()*cur->cTanh.array();
+}
+
+void LSTM::activate(LSTM::State* cur){
+  ActFunc::logistic(cur->i);
+  ActFunc::logistic(cur->o);
+  ActFunc::tanh(cur->u);
+  cur->c = cur->i.array()*cur->u.array();
+  cur->cTanh = cur->c;
+  ActFunc::tanh(cur->cTanh);
+  cur->h = cur->o.array()*cur->cTanh.array();
+}
+
 void LSTM::forward(const VecD& xt, const LSTM::State* prev, LSTM::State* cur){
   cur->i = this->bi;
   cur->i.noalias() += this->Wxi*xt + this->Whi*prev->h;
@@ -72,14 +93,7 @@ void LSTM::forward(const VecD& xt, const LSTM::State* prev, LSTM::State* cur){
   cur->u = this->bu;
   cur->u.noalias() += this->Wxu*xt + this->Whu*prev->h;
 
-  ActFunc::logistic(cur->i);
-  ActFunc::logistic(cur->f);
-  ActFunc::logistic(cur->o);
-  ActFunc::tanh(cur->u);
-  cur->c = cur->i.array()*cur->u.array() + cur->f.array()*prev->c.array();
-  cur->cTanh = cur->c;
-  ActFunc::tanh(cur->cTanh);
-  cur->h = cur->o.array()*cur->cTanh.array();
+  this->activate(prev, cur);
 }
 void LSTM::forward(const VecD& xt, LSTM::State* cur){
   cur->i = this->bi;
@@ -89,13 +103,7 @@ void LSTM::forward(const VecD& xt, LSTM::State* cur){
   cur->u = this->bu;
   cur->u.noalias() += this->Wxu*xt;
 
-  ActFunc::logistic(cur->i);
-  ActFunc::logistic(cur->o);
-  ActFunc::tanh(cur->u);
-  cur->c = cur->i.array()*cur->u.array();
-  cur->cTanh = cur->c;
-  ActFunc::tanh(cur->cTanh);
-  cur->h = cur->o.array()*cur->cTanh.array();
+  this->activate(cur);
 }
 void LSTM::backward(LSTM::State* prev, LSTM::State* cur, LSTM::Grad& grad, const VecD& xt){
   VecD delo, deli, delu, delf;
@@ -118,7 +126,7 @@ void LSTM::backward(LSTM::State* prev, LSTM::State* cur, LSTM::Grad& grad, const
     this->Whf.transpose()*delf+
     this->Who.transpose()*delo+
     this->Whu.transpose()*delu;
-
+  
   grad.Wxi.noalias() += deli*xt.transpose();
   grad.Whi.noalias() += deli*prev->h.transpose();
 
@@ -168,16 +176,20 @@ void LSTM::forward(const VecD& xt, const VecD& at, const LSTM::State* prev, LSTM
   cur->u = this->bu;
   cur->u.noalias() += this->Wxu*xt + this->Whu*prev->h + this->Wau*at;
 
-  ActFunc::logistic(cur->i);
-  ActFunc::logistic(cur->f);
-  ActFunc::logistic(cur->o);
-  ActFunc::tanh(cur->u);
-  cur->c = cur->i.array()*cur->u.array() + cur->f.array()*prev->c.array();
-  cur->cTanh = cur->c;
-  ActFunc::tanh(cur->cTanh);
-  cur->h = cur->o.array()*cur->cTanh.array();
+  this->activate(prev, cur);
 }
+void LSTM::forward(const VecD& xt, const VecD& at, LSTM::State* cur){
+  cur->i = this->bi;
+  cur->i.noalias() += this->Wxi*xt + this->Wai*at;
+  cur->f = this->bf;
+  cur->f.noalias() += this->Wxf*xt + this->Waf*at;
+  cur->o = this->bo;
+  cur->o.noalias() += this->Wxo*xt + this->Wao*at;
+  cur->u = this->bu;
+  cur->u.noalias() += this->Wxu*xt + this->Wau*at;
 
+  this->activate(cur);
+}
 void LSTM::backward(LSTM::State* prev, LSTM::State* cur, LSTM::Grad& grad, const VecD& xt, const VecD& at){
   VecD delo, deli, delu, delf;
 
@@ -225,6 +237,36 @@ void LSTM::backward(LSTM::State* prev, LSTM::State* cur, LSTM::Grad& grad, const
 
   grad.bi += deli;
   grad.bf += delf;
+  grad.bo += delo;
+  grad.bu += delu;
+}
+void LSTM::backward(LSTM::State* cur, LSTM::Grad& grad, const VecD& xt, const VecD& at){
+  VecD delo, deli, delu;
+
+  cur->delc.array() += ActFunc::tanhPrime(cur->cTanh).array()*cur->delh.array()*cur->o.array();
+  delo = ActFunc::logisticPrime(cur->o).array()*cur->delh.array()*cur->cTanh.array();
+  deli = ActFunc::logisticPrime(cur->i).array()*cur->delc.array()*cur->u.array();
+  delu = ActFunc::tanhPrime(cur->u).array()*cur->delc.array()*cur->i.array();
+  
+  cur->delx.noalias() =
+    this->Wxi.transpose()*deli+
+    this->Wxo.transpose()*delo+
+    this->Wxu.transpose()*delu;
+
+  cur->dela.noalias() =
+    this->Wai.transpose()*deli+
+    this->Wao.transpose()*delo+
+    this->Wau.transpose()*delu;
+
+  grad.Wxi.noalias() += deli*xt.transpose();
+  grad.Wxo.noalias() += delo*xt.transpose();
+  grad.Wxu.noalias() += delu*xt.transpose();
+
+  grad.Wai.noalias() += deli*at.transpose();
+  grad.Wao.noalias() += delo*at.transpose();
+  grad.Wau.noalias() += delu*at.transpose();
+
+  grad.bi += deli;
   grad.bo += delo;
   grad.bu += delu;
 }
