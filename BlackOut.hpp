@@ -88,13 +88,4 @@ public:
       }
     }
   }
-
-  void operator /= (const Real val){
-    for (auto it = this->weight.begin(); it != this->weight.end(); ++it){
-      it->second /= val;
-    }
-    for (auto it = this->bias.begin(); it != this->bias.end(); ++it){
-      it->second /= val;
-    }
-  }
 };

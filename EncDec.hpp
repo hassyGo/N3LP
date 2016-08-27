@@ -105,19 +105,6 @@ public:
       }
     }
   }
-
-  void operator /= (const Real val){
-    this->lstmSrcGrad /= val;
-    this->lstmTgtGrad /= val;
-    this->softmaxGrad /= val;
-
-    for (auto it = this->sourceEmbed.begin(); it != this->sourceEmbed.end(); ++it){
-      it->second /= val;
-    }
-    for (auto it = this->targetEmbed.begin(); it != this->targetEmbed.end(); ++it){
-      it->second /= val;
-    }
-  }
 };
 
 class EncDec::DecCandidate{

@@ -147,9 +147,3 @@ void GRU::Grad::operator += (const GRU::Grad& grad){
   this->Wxz += grad.Wxz; this->Whz += grad.Whz; this->bz += grad.bz;
   this->Wxu += grad.Wxu; this->Whu += grad.Whu; this->bu += grad.bu;
 }
-
-void GRU::Grad::operator /= (const Real val){
-  this->Wxr /= val; this->Whr /= val; this->br /= val;
-  this->Wxz /= val; this->Whz /= val; this->bz /= val;
-  this->Wxu /= val; this->Whu /= val; this->bu /= val;
-}

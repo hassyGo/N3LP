@@ -47,5 +47,4 @@ public:
   Real norm();
 
   void operator += (const GRU::Grad& grad);
-  void operator /= (const Real val);
 };

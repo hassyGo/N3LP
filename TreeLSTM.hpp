@@ -53,5 +53,4 @@ public:
   Real norm();
 
   void operator += (const TreeLSTM::Grad& grad);
-  void operator /= (const Real val);
 };

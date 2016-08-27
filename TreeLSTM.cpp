@@ -305,11 +305,3 @@ void TreeLSTM::Grad::operator += (const TreeLSTM::Grad& grad){
   this->Wxo += grad.Wxo; this->WhoL += grad.WhoL; this->WhoR += grad.WhoR; this->bo += grad.bo;
   this->Wxu += grad.Wxu; this->WhuL += grad.WhuL; this->WhuR += grad.WhuR; this->bu += grad.bu;
 }
-
-void TreeLSTM::Grad::operator /= (const Real val){
-  this->Wxi /= val; this->WhiL /= val; this->WhiR /= val; this->bi /= val;
-  this->Wxfl /= val; this->WhflL /= val; this->WhflR /= val; this->bfl /= val;
-  this->Wxfr /= val; this->WhfrL /= val; this->WhfrR /= val; this->bfr /= val;
-  this->Wxo /= val; this->WhoL /= val; this->WhoR /= val; this->bo /= val;
-  this->Wxu /= val; this->WhuL /= val; this->WhuR /= val; this->bu /= val;
-}

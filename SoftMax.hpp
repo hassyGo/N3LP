@@ -45,9 +45,4 @@ public:
     this->weight += grad.weight;
     this->bias += grad.bias;
   }
-
-  void operator /= (const Real val){
-    this->weight /= val;
-    this->bias /= val;
-  }
 };

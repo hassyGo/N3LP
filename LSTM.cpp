@@ -371,12 +371,3 @@ void LSTM::Grad::operator += (const LSTM::Grad& grad){
   this->Wxu += grad.Wxu; this->Whu += grad.Whu; this->bu += grad.bu;
   this->Wai += grad.Wai; this->Waf += grad.Waf; this->Wao += grad.Wao; this->Wau += grad.Wau;
 }
-
-//NOT USED!!
-void LSTM::Grad::operator /= (const Real val){
-  this->Wxi /= val; this->Whi /= val; this->bi /= val;
-  this->Wxf /= val; this->Whf /= val; this->bf /= val;
-  this->Wxo /= val; this->Who /= val; this->bo /= val;
-  this->Wxu /= val; this->Whu /= val; this->bu /= val;
-  this->Wai /= val; this->Waf /= val; this->Wao /= val; this->Wau /= val;
-}
