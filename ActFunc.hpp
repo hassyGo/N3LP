@@ -14,6 +14,9 @@ public:
   static void logistic(VecD& x);
   static MatD logisticPrime(const MatD& x);
   static VecD logisticPrime(const VecD& x);
+
+  static void relu(VecD& x);
+  static VecD reluPrime(const VecD& x);
 };
 
 //f(x) = tanh(x)
@@ -58,4 +61,26 @@ inline MatD ActFunc::logisticPrime(const MatD& x){
 }
 inline VecD ActFunc::logisticPrime(const VecD& x){
   return x.array()*(1.0-x.array());
+}
+
+//ReLu
+inline void ActFunc::relu(VecD& x){
+  for (unsigned int i = 0; i < x.rows(); ++i){
+    if (x.coeff(i, 0) <= 0.0){
+      x.coeffRef(i, 0) = 0.0;
+    }
+  }
+}
+
+inline VecD ActFunc::reluPrime(const VecD& x){
+  VecD res = x;
+  for (unsigned int i = 0; i < res.rows(); ++i){
+    if (res.coeff(i, 0) <= 0.0){
+      res.coeffRef(i, 0) = 0.0;
+    }
+    else {
+      res.coeffRef(i, 0) = 1.0;
+    }
+  }
+  return res;
 }

@@ -13,3 +13,4 @@ typedef Eigen::VectorXd VecD;
 #endif
 
 typedef Eigen::MatrixXi MatI;
+typedef Eigen::VectorXi VecI;

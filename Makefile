@@ -31,6 +31,7 @@ $(BUILD_DIR)/$(PROGRAM) : $(patsubst %,$(BUILD_DIR)/%,$(OBJS))
 	$(CXX) $(CXXFLAGS) $(CXXLIBS) -o $@ $^
 	mv $(BUILD_DIR)/$(PROGRAM) ./
 	rm -f ?*~
+	echo "dummy" > $(BUILD_DIR)/dummy
 
 clean:
 	rm -f $(BUILD_DIR)/* $(PROGRAM) ?*~
