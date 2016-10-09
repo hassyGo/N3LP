@@ -85,13 +85,6 @@ void MaxOut::Grad::l2reg(const Real lambda, const MaxOut& mx){
   }
 }
 
-void MaxOut::Grad::l2reg(const Real lambda, const MaxOut& mx, const MaxOut& target){
-  for (unsigned int i = 0; i < mx.weight.size(); ++i){
-    this->weightGrad[i] += lambda*(mx.weight[i]-target.weight[i]);
-    this->biasGrad[i] += lambda*(mx.bias[i]-target.bias[i]);
-  }
-}
-
 void MaxOut::Grad::sgd(const Real learningRate, MaxOut& mx){
   for (unsigned int i = 0; i < mx.weight.size(); ++i){
     Optimizer::sgd(this->weightGrad[i], learningRate, mx.weight[i]);

@@ -46,7 +46,6 @@ public:
   void init();
   Real norm();
   void l2reg(const Real lambda, const MaxOut& mx);
-  void l2reg(const Real lambda, const MaxOut& mx, const MaxOut& target);
   void sgd(const Real learningRate, MaxOut& af);
   void operator += (const MaxOut::Grad& grad);
   void operator /= (const Real val);
