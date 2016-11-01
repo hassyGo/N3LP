@@ -64,4 +64,5 @@ public:
   Real norm();
 
   void operator += (const LSTM::Grad& grad);
+  void operator /= (const Real val);
 };
