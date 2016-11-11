@@ -35,6 +35,10 @@ Feel free to tell me (hassy@logos.t.u-tokyo.ac.jp) if you are using N3LP or have
 Paper: http://www.logos.t.u-tokyo.ac.jp/~eriguchi/paper/ACL2016/ACL2016.pdf<br>
 Code: https://github.com/tempra28/tree2seq
 
+* The UT-AKY/KAY systems at WAT 2016 (Eriguchi et al., WAT, 2016; Hashimoto et al., WAT 2016)<br>
+Paper (UT-AKY): to apper<br>
+Paper (UT-KAY): http://www.logos.t.u-tokyo.ac.jp/~hassy/publications/wat2016/paper_kay.pdf<br>
+
 ## Contributors ##
 * <a href="http://www.logos.t.u-tokyo.ac.jp/~hassy/">Kazuma Hashimoto</a> - Mainly developing this project
 * <a href="http://www.logos.t.u-tokyo.ac.jp/~eriguchi/">Akiko Eriguchi</a> - Developing practical applications (e.g. <a href="https://github.com/tempra28/tree2seq">tree-to-sequence neural machine translation</a>)
