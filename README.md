@@ -31,6 +31,9 @@ EIGEN_LOCATION=$$HOME/local/eigen_new #Change this line to use Eigen
 
 ## Projects using N3LP ##
 Feel free to tell me (hassy@logos.t.u-tokyo.ac.jp) if you are using N3LP or have any questions!
+* A Joint Many-Task Model: Growing a Neural Network for Multiple NLP Tasks (Hashimoto et al., arXiv, 2016)<br>
+Paper: https://arxiv.org/abs/1611.01587<br>
+
 * Tree-to-Sequence Attentional Neural Machine Translation (Eriguchi et al., ACL, 2016)<br>
 Paper: http://www.logos.t.u-tokyo.ac.jp/~eriguchi/paper/ACL2016/ACL2016.pdf<br>
 Code: https://github.com/tempra28/tree2seq
