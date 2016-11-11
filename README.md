@@ -38,7 +38,7 @@ Paper: https://arxiv.org/abs/1611.01587<br>
 Paper: http://www.logos.t.u-tokyo.ac.jp/~eriguchi/paper/ACL2016/ACL2016.pdf<br>
 Code: https://github.com/tempra28/tree2seq
 
-* The UT-AKY/KAY systems at WAT 2016 (Eriguchi et al., WAT, 2016; Hashimoto et al., WAT 2016)<br>
+* The UT-AKY/KAY systems at WAT 2016 (Eriguchi et al., WAT, 2016; Hashimoto et al., WAT, 2016)<br>
 Paper (UT-AKY): to apper<br>
 Paper (UT-KAY): http://www.logos.t.u-tokyo.ac.jp/~hassy/publications/wat2016/paper_kay.pdf<br>
 
