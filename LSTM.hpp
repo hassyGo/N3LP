@@ -13,6 +13,10 @@ public:
   class State;
   class Grad;
 
+  Real dropoutRateX;
+  Real dropoutRateA;
+  Real dropoutRateH;
+  
   MatD Wxi, Whi; VecD bi; //for the input gate
   MatD Wxf, Whf; VecD bf; //for the forget gate
   MatD Wxo, Who; VecD bo; //for the output gate
@@ -34,6 +38,10 @@ public:
   virtual void forward(const VecD& xt, const VecD& at, LSTM::State* cur);
   virtual void backward(LSTM::State* prev, LSTM::State* cur, LSTM::Grad& grad, const VecD& xt, const VecD& at);
   virtual void backward(LSTM::State* cur, LSTM::Grad& grad, const VecD& xt, const VecD& at);
+
+  void dropout(bool isTest);
+  void operator += (const LSTM& lstm);
+  void operator /= (const Real val);
 };
 
 class LSTM::State{
@@ -42,6 +50,7 @@ public:
 
   VecD h, c, u, i, f, o;
   VecD cTanh;
+  VecD maskXt, maskAt, maskHt; //for dropout
 
   VecD delh, delc, delx, dela; //for backprop
 
@@ -50,9 +59,11 @@ public:
 
 class LSTM::Grad{
 public:
-  Grad(){}
+  Grad(): gradHist(0) {}
   Grad(const LSTM& lstm);
 
+  LSTM::Grad* gradHist;
+  
   MatD Wxi, Whi; VecD bi;
   MatD Wxf, Whf; VecD bf;
   MatD Wxo, Who; VecD bo;
@@ -62,6 +73,11 @@ public:
 
   void init();
   Real norm();
+  void l2reg(const Real lambda, const LSTM& lstm);
+  void l2reg(const Real lambda, const LSTM& lstm, const LSTM& target);
+  void sgd(const Real learningRate, LSTM& lstm);
+  void adagrad(const Real learningRate, LSTM& lstm, const Real initVal = 1.0);
+  void momentum(const Real learningRate, const Real m, LSTM& lstm);
 
   void operator += (const LSTM::Grad& grad);
   void operator /= (const Real val);

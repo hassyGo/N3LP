@@ -28,104 +28,152 @@ void DeepLSTM::init(Rand& rnd, const Real scale){
   }
 }
 
-void DeepLSTM::forward(const VecD& xt, const DeepLSTM::State* prev, DeepLSTM::State* cur, int depth){
-  if (depth == -1){
-    depth = this->lstms.size();
+void DeepLSTM::forward(const VecD& xt, const DeepLSTM::State* prev, DeepLSTM::State* cur, int startDepth, int endDepth){
+  if (startDepth == -1){
+    startDepth = 1;
   }
-  
-  this->lstms[0].forward(xt, prev->lstm[0], cur->lstm[0]);
+  if (endDepth == -1){
+    endDepth = this->lstms.size();
+  }
 
-  for (int i = 1; i < depth; ++i){
+  for (int i = startDepth-1; i < endDepth; ++i){
+    if (i == 0){
+      this->lstms[0].forward(xt, prev->lstm[0], cur->lstm[0]);
+      continue;
+    }
+
     this->lstms[i].forward(cur->lstm[i-1]->h, prev->lstm[i], cur->lstm[i]);
   }
 }
 
-void DeepLSTM::forward(const VecD& xt, const VecD& at, const DeepLSTM::State* prev, DeepLSTM::State* cur, int depth){
-  if (depth == -1){
-    depth = this->lstms.size();
+void DeepLSTM::forward(const VecD& xt, const VecD& at, const DeepLSTM::State* prev, DeepLSTM::State* cur, int startDepth, int endDepth){
+  if (startDepth == -1){
+    startDepth = 1;
   }
-  
-  this->lstms[0].forward(xt, prev->lstm[0], cur->lstm[0]);
+  if (endDepth == -1){
+    endDepth = this->lstms.size();
+  }
 
-  for (int i = 1; i < depth; ++i){
+  for (int i = startDepth-1; i < endDepth; ++i){
+    if (i == 0){
+      this->lstms[0].forward(xt, prev->lstm[0], cur->lstm[0]);
+      continue;
+    }
+
     this->lstms[i].forward(cur->lstm[i-1]->h, at, prev->lstm[i], cur->lstm[i]);
   }
 }
 
-void DeepLSTM::forward(const VecD& xt, DeepLSTM::State* cur, int depth){
-  if (depth == -1){
-    depth = this->lstms.size();
+void DeepLSTM::forward(const VecD& xt, DeepLSTM::State* cur, int startDepth, int endDepth){
+  if (startDepth == -1){
+    startDepth = 1;
   }
-    
-  this->lstms[0].forward(xt, cur->lstm[0]);
+  if (endDepth == -1){
+    endDepth = this->lstms.size();
+  }
+  
+  for (int i = startDepth-1; i < endDepth; ++i){
+    if (i == 0){
+      this->lstms[0].forward(xt, cur->lstm[0]);
+      continue;
+    }
 
-  for (int i = 1; i < depth; ++i){
     this->lstms[i].forward(cur->lstm[i-1]->h, cur->lstm[i]);
   }
 }
 
-void DeepLSTM::forward(const VecD& xt, const VecD& at, DeepLSTM::State* cur, int depth){
-  if (depth == -1){
-    depth = this->lstms.size();
+void DeepLSTM::forward(const VecD& xt, const VecD& at, DeepLSTM::State* cur, int startDepth, int endDepth){
+  if (startDepth == -1){
+    startDepth = 1;
   }
-    
-  this->lstms[0].forward(xt, cur->lstm[0]);
+  if (endDepth == -1){
+    endDepth = this->lstms.size();
+  }
 
-  for (int i = 1; i < depth; ++i){
+  for (int i = startDepth-1; i < endDepth; ++i){
+    if (i == 0){
+      this->lstms[0].forward(xt, cur->lstm[0]);
+      continue;
+    }
+
     this->lstms[i].forward(cur->lstm[i-1]->h, at, cur->lstm[i]);
   }
 }
 
-void DeepLSTM::backward(DeepLSTM::State* prev, DeepLSTM::State* cur, DeepLSTM::Grad& grad, const VecD& xt, int depth){
-  if (depth == -1){
-    depth = this->lstms.size();
+void DeepLSTM::backward(DeepLSTM::State* prev, DeepLSTM::State* cur, DeepLSTM::Grad& grad, const VecD& xt, int startDepth, int endDepth){
+  if (startDepth == -1){
+    startDepth = 1;
+  }
+  if (endDepth == -1){
+    endDepth = this->lstms.size();
   }
   
-  for (int i = depth-1; i >= 1; --i){
-    this->lstms[i].backward(prev->lstm[i], cur->lstm[i], grad.lstm[i], cur->lstm[i-1]->h);
-    cur->lstm[i-1]->delh += cur->lstm[i]->delx;
+  for (int i = endDepth-1; i >= startDepth-1; --i){
+    if (i == 0){
+      this->lstms[0].backward(prev->lstm[0], cur->lstm[0], grad.lstm[0], xt);
+    }
+    else {
+      this->lstms[i].backward(prev->lstm[i], cur->lstm[i], grad.lstm[i], cur->lstm[i-1]->h);
+      cur->lstm[i-1]->delh += cur->lstm[i]->delx;
+    }
   }
-
-  this->lstms[0].backward(prev->lstm[0], cur->lstm[0], grad.lstm[0], xt);
 }
 
-void DeepLSTM::backward(DeepLSTM::State* prev, DeepLSTM::State* cur, DeepLSTM::Grad& grad, const VecD& xt, const VecD& at, int depth){
-  if (depth == -1){
-    depth = this->lstms.size();
+void DeepLSTM::backward(DeepLSTM::State* prev, DeepLSTM::State* cur, DeepLSTM::Grad& grad, const VecD& xt, const VecD& at, int startDepth, int endDepth){
+  if (startDepth == -1){
+    startDepth = 1;
+  }
+  if (endDepth == -1){
+    endDepth = this->lstms.size();
   }
   
-  for (int i = depth-1; i >= 1; --i){
-    this->lstms[i].backward(prev->lstm[i], cur->lstm[i], grad.lstm[i], cur->lstm[i-1]->h, at);
-    cur->lstm[i-1]->delh += cur->lstm[i]->delx;
+  for (int i = endDepth-1; i >= startDepth-1; --i){
+    if (i == 0){
+      this->lstms[0].backward(prev->lstm[0], cur->lstm[0], grad.lstm[0], xt);
+    }
+    else {
+      this->lstms[i].backward(prev->lstm[i], cur->lstm[i], grad.lstm[i], cur->lstm[i-1]->h, at);
+      cur->lstm[i-1]->delh += cur->lstm[i]->delx;
+    }
   }
-
-  this->lstms[0].backward(prev->lstm[0], cur->lstm[0], grad.lstm[0], xt);
 }
 
-void DeepLSTM::backward(DeepLSTM::State* cur, DeepLSTM::Grad& grad, const VecD& xt, int depth){
-  if (depth == -1){
-    depth = this->lstms.size();
+void DeepLSTM::backward(DeepLSTM::State* cur, DeepLSTM::Grad& grad, const VecD& xt, int startDepth, int endDepth){
+  if (startDepth == -1){
+    startDepth = 1;
+  }
+  if (endDepth == -1){
+    endDepth = this->lstms.size();
   }
   
-  for (int i = depth-1; i >= 1; --i){
-    this->lstms[i].backward(cur->lstm[i], grad.lstm[i], cur->lstm[i-1]->h);
-    cur->lstm[i-1]->delh += cur->lstm[i]->delx;
+  for (int i = endDepth-1; i >= startDepth-1; --i){
+    if (i == 0){
+      this->lstms[0].backward(cur->lstm[0], grad.lstm[0], xt);
+    }
+    else {
+      this->lstms[i].backward(cur->lstm[i], grad.lstm[i], cur->lstm[i-1]->h);
+      cur->lstm[i-1]->delh += cur->lstm[i]->delx;
+    }
   }
-
-  this->lstms[0].backward(cur->lstm[0], grad.lstm[0], xt);
 }
 
-void DeepLSTM::backward(DeepLSTM::State* cur, DeepLSTM::Grad& grad, const VecD& xt, const VecD& at, int depth){
-  if (depth == -1){
-    depth = this->lstms.size();
+void DeepLSTM::backward(DeepLSTM::State* cur, DeepLSTM::Grad& grad, const VecD& xt, const VecD& at, int startDepth, int endDepth){
+  if (startDepth == -1){
+    startDepth = 1;
+  }
+  if (endDepth == -1){
+    endDepth = this->lstms.size();
   }
   
-  for (int i = depth-1; i >= 1; --i){
-    this->lstms[i].backward(cur->lstm[i], grad.lstm[i], cur->lstm[i-1]->h, at);
-    cur->lstm[i-1]->delh += cur->lstm[i]->delx;
+  for (int i = endDepth-1; i >= startDepth-1; --i){
+    if (i == 0){
+      this->lstms[0].backward(cur->lstm[0], grad.lstm[0], xt);
+    }
+    else {
+      this->lstms[i].backward(cur->lstm[i], grad.lstm[i], cur->lstm[i-1]->h, at);
+      cur->lstm[i-1]->delh += cur->lstm[i]->delx;
+    }
   }
-
-  this->lstms[0].backward(cur->lstm[0], grad.lstm[0], xt);
 }
 
 void DeepLSTM::sgd(const DeepLSTM::Grad& grad, const Real learningRate){
@@ -143,6 +191,18 @@ void DeepLSTM::save(std::ofstream& ofs){
 void DeepLSTM::load(std::ifstream& ifs){
   for (int i = 0; i < (int)this->lstms.size(); ++i){
     this->lstms[i].load(ifs);
+  }
+}
+
+void DeepLSTM::operator += (const DeepLSTM& lstm){
+  for (unsigned int i = 0; i < this->lstms.size(); ++i){
+    this->lstms[i] += lstm.lstms[i];
+  }
+}
+
+void DeepLSTM::operator /= (const Real val){
+  for (auto it = this->lstms.begin(); it != this->lstms.end(); ++it){
+    (*it) /= val;
   }
 }
 
@@ -164,24 +224,56 @@ DeepLSTM::Grad::Grad(const DeepLSTM& dlstm){
   }
 }
 
-void DeepLSTM::Grad::init(){
-  for (auto it = this->lstm.begin(); it != this->lstm.end(); ++it){
-    it->init();
+void DeepLSTM::Grad::init(int depth){
+  if (depth == -1){
+    depth = this->lstm.size()-1;
+  }
+
+  for (int i = 0; i <= depth; ++i){
+    this->lstm[i].init();
   }
 }
 
-Real DeepLSTM::Grad::norm(){
+Real DeepLSTM::Grad::norm(int depth){
   Real res = 0.0;
 
-  for (auto it = this->lstm.begin(); it != this->lstm.end(); ++it){
-    res += it->norm();
+  if (depth == -1){
+    depth = this->lstm.size()-1;
+  }
+
+  for (int i = 0; i <= depth; ++i){
+    res += this->lstm[i].norm();
   }
 
   return res;
 }
 
+void DeepLSTM::Grad::sgd(const Real learningRate, const unsigned int depth, DeepLSTM& lstm){
+  for (unsigned int i = 0; i <= depth; ++i){
+    this->lstm[i].sgd(learningRate, lstm.lstms[i]);
+  }
+}
+
+void DeepLSTM::Grad::adagrad(const Real learningRate, DeepLSTM& lstm, const Real initVal){
+  for (unsigned int i = 0; i < lstm.lstms.size(); ++i){
+    this->lstm[i].adagrad(learningRate, lstm.lstms[i], initVal);
+  }
+}
+
+void DeepLSTM::Grad::momentum(const Real learningRate, const Real m, DeepLSTM& lstm){
+  for (unsigned int i = 0; i < lstm.lstms.size(); ++i){
+    this->lstm[i].momentum(learningRate, m, lstm.lstms[i]);
+  }
+}
+
 void DeepLSTM::Grad::operator += (const DeepLSTM::Grad& grad){
   for (int i = 0; i < (int)grad.lstm.size(); ++i){
     this->lstm[i] += grad.lstm[i];
+  }
+}
+
+void DeepLSTM::Grad::operator /= (const Real val){
+  for (int i = 0; i < (int)this->lstm.size(); ++i){
+    this->lstm[i] /= val;
   }
 }
