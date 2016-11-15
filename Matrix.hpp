@@ -14,3 +14,4 @@ typedef Eigen::VectorXd VecD;
 
 typedef Eigen::MatrixXi MatI;
 typedef Eigen::VectorXi VecI;
+#define REAL_MAX std::numeric_limits<Real>::max()

@@ -16,6 +16,7 @@ public:
   void uniform(VecD& vec, const Real scale = 1.0);
   Real gauss(Real sigma, Real mu = 0.0);
   void gauss(MatD& mat, Real sigma, Real mu = 0.0);
+  void setMask(VecD& mask, const Real p = 0.5);
   template <typename T> void shuffle(std::vector<T>& data);
 
 private:
@@ -69,6 +70,12 @@ inline void Rand::gauss(MatD& mat, Real sigma, Real mu){
     for (int j = 0; j < mat.cols(); ++j){
       mat.coeffRef(i, j) = this->gauss(sigma, mu);
     }
+  }
+}
+
+inline void Rand::setMask(VecD& mask, const Real p){
+  for (int i = 0; i < mask.rows(); ++i){
+    mask.coeffRef(i, 0) = (this->zero2one() < p ? 1.0 : 0.0);
   }
 }
 
