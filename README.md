@@ -22,12 +22,16 @@ Layer Normalization [5] is a normalization method for deep neural networks and i
 [5] http://arxiv.org/abs/1607.06450
 
 ## USAGE ##
-1) modify the line in Makefile to use Eigen<br>
+1) select your appropriate compiler (now, Linux or Mac OSX)<br>
+CXX=g++ # for linux<br>
+#CXX=clang-omp++ # for Mac OSX Yosemite (suggested by xuanchien@github)
+
+2) modify the line in Makefile to use Eigen<br>
 EIGEN_LOCATION=$$HOME/local/eigen_new #Change this line to use Eigen
 
-2) run the command "make"
+3) run the command "make"
 
-3) ./run the command "n3lp", and then the seq2seq model training starts (currently)
+4) ./run the command "n3lp", and then the seq2seq model training starts (currently)
 
 ## Projects using N3LP ##
 Feel free to tell me (hassy@logos.t.u-tokyo.ac.jp) if you are using N3LP or have any questions!

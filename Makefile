@@ -1,4 +1,5 @@
-CXX=g++
+CXX=g++ # for linux
+#CXX=clang-omp++ # for Mac OSX Yosemite (suggested by xuanchien@github)
 
 EIGEN_LOCATION=$$HOME/local/eigen_new #Change this line to use Eigen
 BUILD_DIR=objs
