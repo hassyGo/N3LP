@@ -24,7 +24,7 @@ Layer Normalization [5] is a normalization method for deep neural networks and i
 ## USAGE ##
 1) select your appropriate compiler (now, Linux or Mac OSX)<br>
 CXX=g++ # for linux<br>
-#CXX=clang-omp++ # for Mac OSX Yosemite (suggested by xuanchien@github)
+CXX=clang-omp++ # for Mac OSX Yosemite (suggested by xuanchien@github)
 
 2) modify the line in Makefile to use Eigen<br>
 EIGEN_LOCATION=$$HOME/local/eigen_new #Change this line to use Eigen
