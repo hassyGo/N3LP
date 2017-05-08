@@ -41,7 +41,7 @@ Paper: https://arxiv.org/abs/1702.02265<br>
 * A Joint Many-Task Model: Growing a Neural Network for Multiple NLP Tasks (Hashimoto et al., arXiv, 2016)<br>
 Paper: https://arxiv.org/abs/1611.01587<br>
 
-* Learning to Parse and Translate Improves Neural Machine Translation (Eriguchi et al., arXiv, 2017)<br>
+* Learning to Parse and Translate Improves Neural Machine Translation (Eriguchi et al., ACL, 2017)<br>
 Paper: https://arxiv.org/abs/1702.03525<br>
 
 * Tree-to-Sequence Attentional Neural Machine Translation (Eriguchi et al., ACL, 2016)<br>
