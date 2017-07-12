@@ -35,18 +35,20 @@ EIGEN_LOCATION=$$HOME/local/eigen_new #Change this line to use Eigen
 
 ## Projects using N3LP ##
 Feel free to tell me (hassy@logos.t.u-tokyo.ac.jp) if you are using N3LP or have any questions!
-* Neural Machine Translation with Source-Side Latent Graph Parsing (Hashimoto and Tsuruoka, arXiv, 2017)<br>
+* Neural Machine Translation with Source-Side Latent Graph Parsing (Hashimoto and Tsuruoka, EMNLP, 2017)<br>
 Paper: https://arxiv.org/abs/1702.02265<br>
+Project page: http://www.logos.t.u-tokyo.ac.jp/~hassy/publications/arxiv2017latent<br>
 
-* A Joint Many-Task Model: Growing a Neural Network for Multiple NLP Tasks (Hashimoto et al., arXiv, 2016)<br>
+* A Joint Many-Task Model: Growing a Neural Network for Multiple NLP Tasks (Hashimoto et al., EMNLP, 2017)<br>
 Paper: https://arxiv.org/abs/1611.01587<br>
+Project page: http://www.logos.t.u-tokyo.ac.jp/~hassy/publications/arxiv2016jmt<br>
 
 * Learning to Parse and Translate Improves Neural Machine Translation (Eriguchi et al., ACL, 2017)<br>
 Paper: https://arxiv.org/abs/1702.03525<br>
 
 * Tree-to-Sequence Attentional Neural Machine Translation (Eriguchi et al., ACL, 2016)<br>
 Paper: http://www.logos.t.u-tokyo.ac.jp/~eriguchi/paper/ACL2016/ACL2016.pdf<br>
-Code: https://github.com/tempra28/tree2seq
+Code: https://github.com/tempra28/tree2seq<br>
 
 * The UT-AKY/KAY systems at WAT 2016 (Eriguchi et al., WAT, 2016; Hashimoto et al., WAT, 2016)<br>
 Paper (UT-AKY): https://aclweb.org/anthology/W/W16/W16-4617.pdf<br>
