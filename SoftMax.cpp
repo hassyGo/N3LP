@@ -60,7 +60,7 @@ void SoftMax::load(std::ifstream& ifs){
 
 void SoftMax::operator += (const SoftMax& softmax){
   this->weight += softmax.weight;
-  this->bias += softmax.weight;
+  this->bias += softmax.bias;
 }
 
 void SoftMax::operator /= (const Real val){
